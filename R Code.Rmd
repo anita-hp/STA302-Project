@@ -1,0 +1,21 @@
+---
+title: ""
+author: "Anita Hessami Pilehrood, Isabelle, Christian"
+subtitle: "STA302 - Fall 2023 - Project"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: pdf_document
+---
+
+
+Introduction section:
+
+Methods section:  
+
+Results section: 
+
+Discussion section: 
+
+Ethics discussion:
+```{r}
+
+```
