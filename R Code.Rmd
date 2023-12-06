@@ -10,6 +10,8 @@ output: pdf_document
 Introduction section:
 
 Methods section:
+
+```{r}
 library(readxl)
 Dataset <- read.csv("/Users/christianhardat/Downloads/STA302 Part 1 Cleaned Dataset.csv")
   
@@ -76,7 +78,7 @@ plot(x = y_hat, y = model3$crootThinness, main="Response vs Fitted",
      xlab="Fitted", ylab="croot(Thinness)")
 abline(a = 0, b = 1, lty=2)
 
-
+```
 Results section: 
 
 Discussion section: 
