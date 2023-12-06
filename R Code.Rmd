@@ -1,6 +1,6 @@
 ---
 title: ""
-author: "Anita Hessami Pilehrood, Isabelle, Christian"
+author: "Anita Hessami Pilehrood, Isabelle, Christian Hardat"
 subtitle: "STA302 - Fall 2023 - Project"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: pdf_document
