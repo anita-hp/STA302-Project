@@ -9,7 +9,73 @@ output: pdf_document
 
 Introduction section:
 
-Methods section:  
+Methods section:
+library(readxl)
+Dataset <- read.csv("/Users/christianhardat/Downloads/STA302 Part 1 Cleaned Dataset.csv")
+  
+summary(Dataset)
+
+new <- subset(as.data.frame(Dataset), 
+              select = c(Thinness, Hepatitis_B, Measles, 
+                         Healthcare_Expenditure, Status_name, Schooling))
+
+new_clean <- new[complete.cases(new),]
+dim(new_clean)
+
+summary(new_clean)
+
+model1 <- lm(Thinness ~ Hepatitis_B + Measles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
+model1
+
+y_hat <- fitted(model1)
+e_hat <- resid(model1)
+plot(x = y_hat, y = e_hat, main="Residual vs Fitted", xlab="Fitted",
+     ylab="Residuals")
+plot(e_hat ~ Dataset$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
+plot(e_hat ~ Dataset$Measles, main="Residuals vs Measles", xlab="Measles", ylab="Residual")
+plot(e_hat ~ Dataset$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
+boxplot(e_hat ~ Dataset$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
+plot(e_hat ~ Dataset$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
+qqnorm(e_hat)
+qqline(e_hat)
+plot(x = y_hat, y = model1$Thinness, main="Response vs Fitted",
+     xlab="Fitted", ylab="Thinness")
+abline(a = 0, b = 1, lty=2)
+hist(Dataset$Thinness, main="Histogram", xlab="Thinness")
+
+#install.packages("car")
+library(car)
+
+boxCox(model1)
+
+any(Dataset$Measles <= 0)
+constant_value <- 0.0001
+Dataset$adjMeasles <- Dataset$Measles + constant_value
+p <- powerTransform(Dataset$adjMeasles)
+summary(p)
+
+Dataset$crootThinness <- (Dataset$Thinness)^(1/3)
+constant_value <- 0.0001
+Dataset$adjMeasles <- Dataset$Measles + constant_value
+Dataset$lnMeasles <- log(Dataset$adjMeasles)
+model3 <- lm(Dataset$crootThinness ~ Hepatitis_B + Dataset$lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
+model3
+hist(Dataset$sqrtThinness, main="Histogram", xlab="sqrt(Thinness)")
+y_hat <- fitted(model3)
+e_hat <- resid(model3)
+plot(x = y_hat, y = e_hat, main="Residual vs Fitted", xlab="Fitted",
+     ylab="Residuals")
+plot(e_hat ~ Dataset$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
+plot(e_hat ~ Dataset$lnMeasles, main="Residuals vs ln(Measles)", xlab="Measles", ylab="Residual")
+plot(e_hat ~ Dataset$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
+boxplot(e_hat ~ Dataset$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
+plot(e_hat ~ Dataset$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
+qqnorm(e_hat)
+qqline(e_hat)
+plot(x = y_hat, y = model3$crootThinness, main="Response vs Fitted",
+     xlab="Fitted", ylab="croot(Thinness)")
+abline(a = 0, b = 1, lty=2)
+
 
 Results section: 
 
