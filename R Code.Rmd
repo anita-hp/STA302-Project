@@ -87,8 +87,31 @@ plot(x = y_hat, y = model3$crootThinness, main="Response vs Fitted",
 abline(a = 0, b = 1, lty=2)
 
 ```
-Results section: 
 
+```{r}
+#install.packages("MASS")
+library(MASS)
+stepAIC(lm(Dataset$crootThinness ~ 1, data=Dataset[,-1]),scope=list(upper=lm(Dataset$crootThinness ~ ., data=Dataset[,-1])), direction = "both", k=5)
+
+```
+
+```{r}
+#install.packages("leaps")
+library(leaps)
+
+best <- regsubsets(Dataset$crootThinness ~ Hepatitis_B + Dataset$lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean, nbest = 1, nvmax=5)
+summary(best)
+
+library(car)
+subsets(best, statistic = "adjr2", legend=TRUE)
+
+```
+
+Results section: 
+```{r}
+confint(model4)
+#predict(model4, newdata = new, interval="prediction", level=0.95)
+```
 Discussion section: 
 
 Ethics discussion:
