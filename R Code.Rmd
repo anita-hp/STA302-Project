@@ -64,22 +64,23 @@ Dataset$adjMeasles <- Dataset$Measles + constant_value
 p <- powerTransform(Dataset$adjMeasles)
 summary(p)
 
-Dataset$crootThinness <- (Dataset$Thinness)^(1/3)
+new_clean$crootThinness <- (new_clean$Thinness)^(1/3)
 constant_value <- 0.0001
-Dataset$adjMeasles <- Dataset$Measles + constant_value
-Dataset$lnMeasles <- log(Dataset$adjMeasles)
-model3 <- lm(Dataset$crootThinness ~ Hepatitis_B + Dataset$lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
+new_clean$adjMeasles <- new_clean$Measles + constant_value
+new_clean$lnMeasles <- log(new_clean$adjMeasles+1)
+model3 <- lm(crootThinness ~ Hepatitis_B + lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
 model3
-hist(Dataset$sqrtThinness, main="Histogram", xlab="sqrt(Thinness)")
+
+hist(new_clean$crootThinness, main="Histogram", xlab="sqrt(Thinness)")
 y_hat <- fitted(model3)
 e_hat <- resid(model3)
 plot(x = y_hat, y = e_hat, main="Residual vs Fitted", xlab="Fitted",
      ylab="Residuals")
-plot(e_hat ~ Dataset$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
-plot(e_hat ~ Dataset$lnMeasles, main="Residuals vs ln(Measles)", xlab="Measles", ylab="Residual")
-plot(e_hat ~ Dataset$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
-boxplot(e_hat ~ Dataset$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
-plot(e_hat ~ Dataset$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
+plot(e_hat ~ new_clean$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
+plot(e_hat ~ new_clean$lnMeasles, main="Residuals vs ln(Measles)", xlab="Measles", ylab="Residual")
+plot(e_hat ~ new_clean$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
+boxplot(e_hat ~ new_clean$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
+plot(e_hat ~ new_clean$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
 qqnorm(e_hat)
 qqline(e_hat)
 plot(x = y_hat, y = model3$crootThinness, main="Response vs Fitted",
