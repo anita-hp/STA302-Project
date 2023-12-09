@@ -24,6 +24,14 @@ new <- subset(as.data.frame(Dataset),
 new_clean <- new[complete.cases(new),]
 dim(new_clean)
 
+
+# Convert categorical variables to factors
+new_clean$Status_name <- as.factor(new_clean$Status_name)
+
+# Create dummy variables for categorical predictors
+new_clean <- model.matrix(~ . - 1, data = new_clean)
+new_clean <- data.frame(new_clean)
+
 summary(new_clean)
 
 model1 <- lm(Thinness ~ Hepatitis_B + Measles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
