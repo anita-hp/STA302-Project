@@ -141,6 +141,188 @@ library(car)
 subsets(best, statistic = "adjr2", legend=TRUE)
 
 ```
+```{r}
+# Checking for problematic observations
+model3 <- lm(crootThinness ~ Hepatitis_B + lnMeasles + Healthcare_Expenditure + Status_nameDeveloping + Schooling, data = new_clean)
+model3
+
+```
+
+```{r}
+# Defining the cutoffs
+# useful values:
+n <- nrow(new_clean)
+p <- length(coef(model3))-1
+
+# leverage cutoff
+h_cut <- 2*(p+1)/n 
+
+# cooks cutoff
+D_cut <- qf(0.5, p+1, n-p-1) 
+
+# DFFITS cutoff
+fits_cut <- 2*sqrt((p+1)/n)
+
+# DFBETAS cutoff
+beta_cut <- 2/sqrt(n)
+
+#Compute the measures for each problematic observation on transformed model
+# leverage
+h_ii <- hatvalues(model3) 
+
+# outlier
+r_i <- rstandard(model3) 
+
+# Cook's Distance
+D_i <- cooks.distance(model3) 
+
+# DFFITS
+dffits_i <- dffits(model3)
+
+# DFBETAS
+dfbetas_i <- dfbetas(model3)
+
+```
+
+```{r}
+# identify leverage points
+which(h_ii > h_cut)
+```
+
+```{r}
+# identify outliers
+which(r_i > 4 | r_i < -4)
+```
+
+```{r}
+# influential on all fitted values
+which(D_i > D_cut)
+```
+
+```{r}
+# influential on own fitted value
+which(abs(dffits_i) > fits_cut)
+```
+
+```{r}
+# influential on a coefficient
+for(i in 1:6){
+        print(paste0("Beta ", i-1))
+        print(which(abs(dfbetas_i) > beta_cut))
+}
+```
+
+
+```{r}
+nrow(new_clean)
+
+# Split data in half
+s <- sample(1:nrow(new_clean), 1285 , replace=F) 
+train <- new_clean[s ,]
+test <- new_clean[-s,]
+```
+
+```{r}
+install.packages("psych")
+library(psych)
+describe(train)
+describe(test)
+```
+
+```{r}
+# Fit final model 
+
+final <- lm(crootThinness ~ lnMeasles + Healthcare_Expenditure + Status_nameDeveloping + Schooling, data = train ) 
+
+# check conditions
+pairs(train[,c(4,6,7,10 )])
+plot(train$crootThinness ~ fitted(final))
+```
+
+```{r}
+# Check assumptions
+par(mfrow=c(3,2))
+plot(resid(final)~fitted(final), xlab="fitted", ylab="residuals") 
+for(i in c(4,6,7,10)){
+        plot(resid(final) ~ train[,i], xlab=names(train)[i], ylab="residuals")
+}
+qqnorm(resid(final))
+qqline(resid(final))
+```
+
+```{r}
+# Multicollinearity
+vif(final)
+```
+
+```{r}
+# a function that will compute problematic observations for you
+probobs <- function(model, data){ 
+        n_1 <- nrow(data)
+        p <- length(coef(model))-1
+# leverage cutoff
+        h_cut <- 2*(p+1)/n
+        print(which(hatvalues(model) > h_cut))
+# outliers
+        print("outliers (large)")
+        print(which(rstandard(model) > 4 | rstandard(model) < -4)) 
+# cooks cutoff
+        D_cut <- qf(0.5, p+1, n-p-1)
+        print("Cooks")
+        print(which(cooks.distance(model) > D_cut))
+# DFFITS cutoff
+        fits_cut <- 2*sqrt((p+1)/n)
+        print("DFFITS")
+        print(which(abs(dffits(model)) > fits_cut))
+# DFBETAS cutoff
+        beta_cut <- 2/sqrt(n)
+        for(i in 1:(p+1)){
+                print(paste0("Beta ", i-1))
+                print(which(abs(dfbetas(model)[,i]) > beta_cut)) 
+                }
+}
+# to use the function, run above and this next line:
+probobs(final, train)
+```
+
+```{r}
+summary(final)
+```
+
+```{r}
+# Fit final model using test dataset 
+
+final_test <- lm(crootThinness  ~ lnMeasles + Healthcare_Expenditure +
+                    Status_nameDeveloping + Schooling, data = test ) 
+summary(final_test)
+```
+
+```{r}
+# check conditions for test
+pairs(test[,c(4,6,7,10 )])
+plot(test$crootThinness ~ fitted(final_test))
+```
+
+```{r}
+# check assumptions
+par(mfrow=c(3,2))
+plot(resid(final_test)~fitted(final_test), xlab="fitted", ylab="residuals") 
+for(i in c(4,6,7,10)){
+        plot(resid(final_test) ~ test[,i], xlab=names(test)[i], ylab="residuals") 
+}
+
+qqnorm(resid(final_test)) 
+qqline(resid(final_test))
+
+#multicollinearity
+vif(final_test)
+```
+
+```{r}
+# problematic observations
+# to use the function, run this next line (since function was already run earlier): 
+probobs(final_test, test)
+```
 
 Results section: 
 ```{r}
