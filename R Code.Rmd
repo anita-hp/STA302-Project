@@ -9,6 +9,40 @@ output: pdf_document
 
 Introduction section:
 
+```{r}
+# code for fitting priliminary model 
+# Load necessary libraries
+library(readr)
+library(dplyr)
+library(ggplot2)
+
+
+# Read the dataset
+data <- read_csv("Dataset.csv")
+
+# Convert categorical variables to factors
+data$Status_name <- as.factor(data$Status_name)
+
+# Create dummy variables for categorical predictors
+data <- model.matrix(~ . - 1, data = data)
+data <- data.frame(data)
+
+# Define the model formula
+model_formula <- Thinness ~ Hepatitis_B + Measles + Healthcare_Expenditure + Schooling + Status_nameDeveloping
+
+# Fit the linear model to the entire dataset
+model <- lm(model_formula, data = data)
+
+# Summary of the model
+summary(model)
+
+# Extract fitted/predicted values 
+y_hat <- fitted(model)
+# Extract residuals from the model
+e_hat <- resid(model)
+
+```
+
 Methods section:
 
 ```{r}
