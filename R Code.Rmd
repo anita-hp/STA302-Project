@@ -63,7 +63,7 @@ e_hat <- resid(model)
 plot(x = y_hat, y = data$Thinness,
      xlab = "Fitted Values",
      ylab = "Thinness",
-     main = "Thiness vs. Fitted"
+     main = "Thinness vs. Fitted"
 )
 
 # Adding a line of perfect fit for reference
