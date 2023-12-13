@@ -120,7 +120,7 @@ par(mfrow=c(2,2))
 # Check the new residuals vs. fitted values plot
 plot(fitted(model_root), resid(model_root),
      xlab = "Fitted Values", ylab = "Residuals",
-     main = "Residuals vs. Fitted Values after Root Transformation")
+     main = "Residuals vs. Fitted Values \nafter Root Transformation")
 abline(h = 0, col = "red", lty = 2)
 
 eroot_hat <- resid(model_root)
@@ -129,7 +129,7 @@ qqnorm(eroot_hat)
 qqline(eroot_hat)
 
 # Scatterplot of Residual vs. Measles of transformed model 
-plot(data$log_Measles, eroot_hat, main="Residuals vs Measles after Root Transformation", xlab="Measles", ylab="Residuals")
+plot(data$log_Measles, eroot_hat, main="Residuals vs Measles \nafter Root Transformation", xlab="Measles", ylab="Residuals")
 
 # scatterplot of residuals versus each predictor
 plot(data$Hepatitis_B, eroot_hat, main="Residuals vs Hepatitis_B", xlab="Hepatitis_B", ylab="Residuals")
