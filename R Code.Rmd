@@ -1,4 +1,8 @@
 ---
+title: "Clean codes"
+output: pdf_document
+---
+---
 title: ""
 author: "Anita Hessami Pilehrood, Isabelle Liu, Christian Hardat"
 subtitle: "STA302 - Fall 2023 - Project"
@@ -6,18 +10,26 @@ date: "`r format(Sys.time(), '%d %B, %Y')`"
 output: pdf_document
 ---
 
-
-Introduction section:
-
-```{r}
+```{r, include=FALSE}
 # Load necessary libraries
 library(readr)
 library(dplyr)
 library(ggplot2)
+packageurl <- "https://cran.r-project.org/src/contrib/Archive/pbkrtest/pbkrtest_0.4-4.tar.gz" 
+install.packages(packageurl, repos=NULL, type="source")
+install.packages("car", dependencies=TRUE)
+library(car)
+install.packages("psych")
+library(psych)
+install.packages("MASS")
+library(MASS)
+install.packages("leaps")
+library(leaps)
+```
 
-
+```{r}
 # Read the dataset
-data <- read_csv("Dataset.csv")
+data <- read.csv("STA302 Part 3 Cleaned Dataset.csv")
 
 # Convert categorical variables to factors
 data$Status_name <- as.factor(data$Status_name)
@@ -35,49 +47,10 @@ model <- lm(model_formula, data = data)
 # Summary of the model
 summary(model)
 
-# Extract fitted/predicted values 
-y_hat <- fitted(model)
-# Extract residuals from the model
-e_hat <- resid(model)
 
+```
 
-######## Response vs. Fitted Values Scatterplot (Conditional Mean Response)
-# Plot the observed values vs. the fitted values
-plot(x = y_hat, y = data$Thinness,
-     xlab = "Fitted Values",
-     ylab = "Thinness",
-     main = "Thiness vs. Fitted"
-)
-
-# Adding a line of perfect fit for reference
-abline(0, 1, col = "red", lwd = 2, lty = 2)
-
-
-###### Pairwise Scatterplots of Predictors (Conditonal Mean Predictors)
-pairs(data[, c(2, 3, 4, 6, 7)], main = "Pairwise Scatterplots of Predictors")
-
-
-# scatterplot of residuals versus fitted values
-plot(y_hat, e_hat, main="Residuals vs Fitted", xlab="Fitted", ylab="Residuals")
-
-# scatterplot of residuals versus each predictor
-plot(data$Hepatitis_B, e_hat, main="Residuals vs Hepatitis_B", xlab="Hepatitis_B", ylab="Residuals")
-
-plot(data$Measles, e_hat, main="Residuals vs Measles", xlab="Measles", ylab="Residuals")
-
-plot(data$Healthcare_Expenditure, e_hat, main="Residuals vs Healthcare", xlab="Healthcare", ylab="Residuals")
-
-plot(data$Schooling, e_hat, main="Residuals vs Schooling", xlab="Schooling ", ylab="Residuals")
-
-# boxplot of residuals vs Developing
-boxplot(e_hat ~ data$Status_nameDeveloping, main="Residuals by Developing", xlab="Developing", ylab="Residuals")
-
-
-# Normal QQ plot
-qqnorm(e_hat)
-qqline(e_hat)
-
-
+```{r}
 #### log(Thinness) transformation #1
 data$Log_Thinness <- log(data$Thinness + 1) # Adding 1 to avoid log(0)
 
@@ -94,126 +67,47 @@ elog_hat <- resid(model_transformed)
 # Normal QQ plot
 qqnorm(elog_hat)
 qqline(elog_hat)
-
-#### Cube root(Thinness) & log(Measles) Transformation #2
-data$root_Thinness <- (data$Thinness)^(1/3) 
-data$log_Measles <- log(data$Measles + 1)
-
-# Fit the model with the transformed response variable
-model_root <- lm(root_Thinness ~ Hepatitis_B + log_Measles + Healthcare_Expenditure + Schooling + Status_nameDeveloping, data = data)
-
-# Check the new residuals vs. fitted values plot
-plot(fitted(model_root), resid(model_root),
-     xlab = "Fitted Values", ylab = "Residuals",
-     main = "Residuals vs. Fitted Values after Root Transformation")
-abline(h = 0, col = "red", lty = 2)
-
-eroot_hat <- resid(model_root)
-# Normal QQ plot
-qqnorm(eroot_hat)
-qqline(eroot_hat)
-
-# Scatterplot of Residual vs. Measles of transformed model 
-plot(data$log_Measles, eroot_hat, main="Residuals vs Measles after Root Transformation", xlab="Measles", ylab="Residuals")
-
-# scatterplot of residuals versus each predictor
-plot(data$Hepatitis_B, eroot_hat, main="Residuals vs Hepatitis_B", xlab="Hepatitis_B", ylab="Residuals")
-
-plot(data$Healthcare_Expenditure, eroot_hat, main="Residuals vs Healthcare", xlab="Healthcare", ylab="Residuals")
-
-plot(data$Schooling, eroot_hat, main="Residuals vs Schooling", xlab="Schooling ", ylab="Residuals")
-
-# boxplot of residuals vs Developing
-boxplot(eroot_hat ~ data$Status_nameDeveloping, main="Residuals by Developing", xlab="Developing", ylab="Residuals")
-
-y_root <- fitted(model_root)
-######## Response vs. Fitted Values Scatterplot (Conditional Mean Response)
-# Plot the observed values vs. the fitted values
-plot(x = y_root, y = data$root_Thinness,
-     xlab = "Fitted Values",
-     ylab = "Thinness",
-     main = "Thiness vs. Fitted"
-)
-
-# Adding a line of perfect fit for reference
-abline(0, 1, col = "red", lwd = 2, lty = 2)
+```
 
 
-###### Pairwise Scatterplots of Predictors (Conditonal Mean Predictors)
-pairs(data[, c(2, 10, 4, 6, 7)], main = "Pairwise Scatterplots of Predictors")
+```{r}
+model1 <- lm(Thinness ~ Hepatitis_B + Measles + Healthcare_Expenditure + Status_nameDeveloping + Schooling, data = new_clean)
+model1
+```
 
-summary(model_root)
-qf(0.95, 5, 2564)
-summary(model_root)
+```{r}
+# Find fitted and residual values of original model
+y_hat <- fitted(model1)
+e_hat <- resid(model1)
 
-model_reduce <- lm(root_Thinness ~ log_Measles + Healthcare_Expenditure + Schooling + Status_nameDeveloping, data = data)
-anova(model_reduce, model_root)
-qf(0.95, 1, 2564)
-
-
-
-############### Reduce model Assumption Checks 
-# Extract fitted/predicted values 
-y2_hat <- fitted(model_reduce)
-# Extract residuals from the model
-e2_hat <- resid(model_reduce)
-
-# scatterplot of residuals versus fitted values
-plot(y2_hat, e2_hat, main="Residuals vs Fitted", xlab="Fitted", ylab="Residuals")
-
-# scatterplot of residuals versus each predictor
-plot(data$log_Measles, e2_hat, main="Residuals vs Measles", xlab="Measles", ylab="Residuals")
-
-plot(data$Healthcare_Expenditure, e2_hat, main="Residuals vs Healthcare", xlab="Healthcare", ylab="Residuals")
-
-plot(data$Schooling, e2_hat, main="Residuals vs Schooling", xlab="Schooling ", ylab="Residuals")
-
-# boxplot of residuals vs Developing
-boxplot(e2_hat ~ data$Status_nameDeveloping, main="Residuals by Developing", xlab="Developing", ylab="Residuals")
-
-
-# Normal QQ plot
-qqnorm(e2_hat)
-qqline(e2_hat)
 
 ```
 
-Methods section:
+```{r}
+# Check condition 1 and condition 2
+length(y_hat)
+length(new_clean$Thinness)
+plot(x = y_hat  , y = new_clean$Thinness[1:length(y_hat)]   , main="Response vs Fitted",
+     xlab="Fitted", ylab="Thinness")
+abline(a = 0, b = 1, lty=2)
+
+```
+
+There is no single identifiable pattern so it is randomly scattered. 
+
+```{r, eval=F}
+pairs(new_clean[, c(1:4, 6,7)])
+```
+
+
 
 ```{r}
-library(readxl)
-Dataset <- read.csv("/Users/christianhardat/Downloads/STA302 Part 1 Cleaned Dataset.csv")
-  
-summary(Dataset)
-
-new <- subset(as.data.frame(Dataset), 
-              select = c(Thinness, Hepatitis_B, Measles, 
-                         Healthcare_Expenditure, Status_name, Schooling))
-
-new_clean <- new[complete.cases(new),]
-dim(new_clean)
-
-
-# Convert categorical variables to factors
-new_clean$Status_name <- as.factor(new_clean$Status_name)
-
-# Create dummy variables for categorical predictors
-new_clean <- model.matrix(~ . - 1, data = new_clean)
-new_clean <- data.frame(new_clean)
-
-summary(new_clean)
-
-model1 <- lm(Thinness ~ Hepatitis_B + Measles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
-model1
-
-y_hat <- fitted(model1)
-e_hat <- resid(model1)
 plot(x = y_hat, y = e_hat, main="Residual vs Fitted", xlab="Fitted",
      ylab="Residuals")
 plot(e_hat ~ new_clean$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
 plot(e_hat ~ new_clean$Measles, main="Residuals vs Measles", xlab="Measles", ylab="Residual")
 plot(e_hat ~ new_clean$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
-boxplot(e_hat ~ new_clean$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
+boxplot(e_hat ~ new_clean$Status_nameDeveloping, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
 plot(e_hat ~ new_clean$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
 qqnorm(e_hat)
 qqline(e_hat)
@@ -222,8 +116,12 @@ plot(x = y_hat, y = model1$Thinness, main="Response vs Fitted",
 abline(a = 0, b = 1, lty=2)
 hist(new_clean$Thinness, main="Histogram", xlab="Thinness")
 
-#install.packages("car")
-library(car)
+
+```
+
+
+
+```{r}
 
 boxCox(model1)
 
@@ -237,7 +135,7 @@ new_clean$crootThinness <- (new_clean$Thinness)^(1/3)
 constant_value <- 0.0001
 new_clean$adjMeasles <- new_clean$Measles + constant_value
 new_clean$lnMeasles <- log(new_clean$adjMeasles+1)
-model3 <- lm(crootThinness ~ Hepatitis_B + lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean)
+model3 <- lm(crootThinness ~ Hepatitis_B + lnMeasles + Healthcare_Expenditure + Status_nameDeveloping + Schooling, data = new_clean)
 model3
 
 hist(new_clean$crootThinness, main="Histogram", xlab="sqrt(Thinness)")
@@ -248,36 +146,18 @@ plot(x = y_hat, y = e_hat, main="Residual vs Fitted", xlab="Fitted",
 plot(e_hat ~ new_clean$Hepatitis_B, main="Residuals vs Hepatitis B", xlab="Hepatitis B", ylab="Residual")
 plot(e_hat ~ new_clean$lnMeasles, main="Residuals vs ln(Measles)", xlab="Measles", ylab="Residual")
 plot(e_hat ~ new_clean$Healthcare_Expenditure, main="Residuals vs Healthcare Expenditure", xlab="Healthcare Expenditure", ylab="Residual")
-boxplot(e_hat ~ new_clean$Status_name, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
+boxplot(e_hat ~ new_clean$Status_nameDeveloping, main="Residuals vs Status Name", xlab="Status Name", ylab="Residual")
 plot(e_hat ~ new_clean$Schooling, main="Residuals vs Schooling", xlab="Schooling", ylab="Residual")
 qqnorm(e_hat)
 qqline(e_hat)
 plot(x = y_hat, y = model3$crootThinness, main="Response vs Fitted",
      xlab="Fitted", ylab="croot(Thinness)")
 abline(a = 0, b = 1, lty=2)
-
 ```
 
-```{r}
-#install.packages("MASS")
-library(MASS)
-stepAIC(lm(Dataset$crootThinness ~ 1, data=Dataset[,-1]),scope=list(upper=lm(Dataset$crootThinness ~ ., data=Dataset[,-1])), direction = "both", k=5)
 
-```
 
 ```{r}
-#install.packages("leaps")
-library(leaps)
-
-best <- regsubsets(Dataset$crootThinness ~ Hepatitis_B + Dataset$lnMeasles + Healthcare_Expenditure + Status_name + Schooling, data = new_clean, nbest = 1, nvmax=5)
-summary(best)
-
-library(car)
-subsets(best, statistic = "adjr2", legend=TRUE)
-
-```
-```{r}
-# Checking for problematic observations
 model3 <- lm(crootThinness ~ Hepatitis_B + lnMeasles + Healthcare_Expenditure + Status_nameDeveloping + Schooling, data = new_clean)
 model3
 
@@ -457,16 +337,4 @@ vif(final_test)
 # problematic observations
 # to use the function, run this next line (since function was already run earlier): 
 probobs(final_test, test)
-```
-
-Results section: 
-```{r}
-confint(model4)
-#predict(model4, newdata = new, interval="prediction", level=0.95)
-```
-Discussion section: 
-
-Ethics discussion:
-```{r}
-
 ```
